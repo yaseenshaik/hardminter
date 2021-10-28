@@ -1,0 +1,27 @@
+{
+  "name": "eth-nft-demo",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "compile": "hardhat compile",
+    "node": "hardhat node",
+    "hh:local": "hardhat --network localhost run",
+    "hh:ropsten": "hardhat --network ropsten run",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@nomiclabs/hardhat-ethers": "^2.0.2",
+    "ethers": "^5.0.0",
+    "hardhat": "^2.6.6"
+  },
+  "dependencies": {
+    "@alch/alchemy-web3": "^1.1.6",
+    "@openzeppelin/contracts": "^4.3.2",
+    "dotenv": "^10.0.0",
+    "web3": "^1.6.0"
+  }
+}

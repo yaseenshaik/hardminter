@@ -1,6 +1,6 @@
 const fs = require("fs");
 const solc = require("solc");
-
+const util = require("util");
 // returns a contract object compiled using solc
 // baseContractPath: relative path of the base contract, i.e. "./BaseContract.sol"
 const instantiateContract = (baseContractPath) => {
@@ -21,9 +21,11 @@ const instantiateContract = (baseContractPath) => {
 
   const output = solc.compile(JSON.stringify(input));
   const contract = JSON.parse(output);
+  fs.writeFileSync("contracts/output", JSON.stringify(contract, null, 2));
+  fs.writeFileSync("contracts/contract", JSON.stringify(contract, null, 2));
   const bytecode =
-    "0x" + contract.contracts[baseContractPath]["Base"].evm.bytecode.object;
-  const abi = contract.contracts[baseContractPath]["Base"].abi;
+    "0x" + contract.contracts[baseContractPath]["MyTest"].evm.bytecode.object;
+  const abi = contract.contracts[baseContractPath]["MyTest"].abi;
   return {
     bytecode: bytecode,
     abi: abi,
@@ -33,7 +35,7 @@ const instantiateContract = (baseContractPath) => {
 // returns sources: { "Contract.sol": { content: fs.readFileSync("pathName.sol",utf8)...}}
 // using recursion
 const compileImports = (root, sources) => {
-  console.log('root: ', root);
+  console.log("root: ", root);
   sources[root] = { content: fs.readFileSync(root, "utf8") };
   const imports = getNeededImports(root);
   for (let i = 0; i < imports.length; i++) {
@@ -43,7 +45,7 @@ const compileImports = (root, sources) => {
 
 // returns all the import paths in absolute path
 const getNeededImports = (path) => {
-  console.log('path: ', path);
+  console.log("path: ", path);
   const file = fs.readFileSync(path, "utf8");
   const files = new Array();
   file

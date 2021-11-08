@@ -1,14 +1,14 @@
-var express = require('express');
+var express = require("express");
 var router = express.Router();
-var solc = require('solc');
-const path = require('path');
-const fs = require('fs');
+var solc = require("solc");
+const path = require("path");
+const fs = require("fs");
 const { exec } = require("child_process");
 const { ethers } = require("hardhat");
-const { instantiateContract } = require('../scripts/instantiateContract')
+const { instantiateContract } = require("../scripts/instantiateContract");
 require("dotenv").config();
 
-const { PUBLIC_KEY, PRIVATE_KEY} = process.env;
+const { PUBLIC_KEY, PRIVATE_KEY } = process.env;
 
 const { createAlchemyWeb3 } = require("@alch/alchemy-web3");
 // const web3 = createAlchemyWeb3(API_URL);
@@ -18,16 +18,16 @@ const Web3 = require("web3");
 
 const web3 = new Web3(Web3.givenProvider || "ws://localhost:8545");
 /* GET home page. */
-router.get('/', function (req, res, next) {
-  res.send('Hello World!')
+router.get("/", function (req, res, next) {
+  res.send("Hello World!");
 });
 
-router.post('/contract/deploy', async function (req, res, next) {
+router.post("/contract/deploy", async function (req, res, next) {
   const contractName = req.body.name;
   const contractSymbol = req.body.symbol;
   if (!contractName && !contractSymbol) {
     return res.status(500).send({
-      message: "unauthorized"
+      message: "unauthorized",
     });
   }
   const solidityFile = `
@@ -60,9 +60,13 @@ router.post('/contract/deploy', async function (req, res, next) {
             return newItemId;
         }
     }
-  `
-  const fileName = path.resolve(__dirname, '../contracts', `${contractName}.sol`);
-  
+  `;
+  const fileName = path.resolve(
+    __dirname,
+    "../contracts",
+    `${contractName}.sol`
+  );
+
   try {
     await fs.writeFile(fileName, solidityFile);
     /* const source = await fs.readFile(fileName, 'UTF-8');
@@ -93,24 +97,24 @@ router.post('/contract/deploy', async function (req, res, next) {
     // Start deployment, returning a promise that resolves to a contract object
     const myNFT = await MyNFT.deploy();
     console.log("Contract deployed to address:", myNFT.address);
-    res.send('Hello World!')
+    res.send("Hello World!");
   } catch (err) {
-    console.log('err: ', err);
+    console.log("err: ", err);
     return res.status(500).send(err);
   }
 });
 
-
-router.post('/mint/token', async function (req, res, next) {
+router.post("/mint/token", async function (req, res, next) {
   const tokenURI = {
-    "description": "The world's most adorable and sensitive pup.",
-    "image": "https://gateway.pinata.cloud/ipfs/QmWmvTJmJU3pozR9ZHFmQC2DNDwi2XJtf3QGyYiiagFSWb",
-    "name": "Ramses"
+    description: "The world's most adorable and sensitive pup.",
+    image:
+      "https://gateway.pinata.cloud/ipfs/QmWmvTJmJU3pozR9ZHFmQC2DNDwi2XJtf3QGyYiiagFSWb",
+    name: "Ramses",
   };
   const contract = require("../artifacts/contracts/MyTest.sol/MyTest.json");
   const contractAddress = "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266";
-  console.log('process.env.CONTRACT_ADDRESS: ', process.env.CONTRACT_ADDRESS);
-  console.log('contractAddress: ', contractAddress);
+  console.log("process.env.CONTRACT_ADDRESS: ", process.env.CONTRACT_ADDRESS);
+  console.log("contractAddress: ", contractAddress);
   const nftContract = new web3.eth.Contract(contract.abi, contractAddress);
 
   const nonce = await web3.eth.getTransactionCount(PUBLIC_KEY, "latest"); //get latest nonce
@@ -143,7 +147,7 @@ router.post('/mint/token', async function (req, res, next) {
               hash,
               "\nCheck Alchemy's Mempool to view the status of your transaction!"
             );
-            res.send(hash)
+            res.send(hash);
           } else {
             console.log(
               "Something went wrong when submitting your transaction:",
@@ -160,36 +164,35 @@ router.post('/mint/token', async function (req, res, next) {
     });
 });
 
-
-router.post('/compile', async function (req, res, next) {
+router.get("/compile", async function (req, res) {
   try {
-    const helloPath = path.resolve(__dirname, '../contracts', 'MyTest.sol');
-    const source = await fs.readFile(helloPath, 'UTF-8');
-    // const output = instantiateContract(helloPath)
-    // console.log('output: ', output);
-    var input = {
-      language: 'Solidity',
-      sources: {
-        'MyTest.sol': {
-          content: source,
-        }
-      },
-      settings: {
-        outputSelection: {
-          '*': {
-            '*': ['*']
-          }
-        }
-      }
-    };
+    const helloPath = path.resolve(__dirname, "../contracts", "MyTest.sol");
+    const source = await fs.readFileSync(helloPath, "UTF-8");
+    const output = instantiateContract(helloPath);
+    console.log("output: ", output);
+    // var input = {
+    //   language: "Solidity",
+    //   sources: {
+    //     "MyTest.sol": {
+    //       content: source,
+    //     },
+    //   },
+    //   settings: {
+    //     outputSelection: {
+    //       "*": {
+    //         "*": ["*"],
+    //       },
+    //     },
+    //   },
+    // };
     // console.log(solc.compile(source, 1));
-    console.log('compiling contract');
-    let compiledContract = JSON.parse(solc.compile(JSON.stringify(input)));
-    console.log('Contract Compiled', compiledContract);
-  } catch (err) { 
-    console.log('err: ', err);
+    // console.log("compiling contract");
+    // let compiledContract = JSON.parse(solc.compile(JSON.stringify(input)));
+    // console.log("Contract Compiled", compiledContract);
+    res.json(output);
+  } catch (err) {
+    console.log("err: ", err);
   }
 });
-
 
 module.exports = router;
